@@ -1,25 +1,72 @@
 #!/usr/bin/perl
 
 use strict;
+use IO::File;
+use Data::Dumper;
+
 use  DBI;
 use DBD::mysql;
 
-# DBI CONFIG VARIABLES
-my $host = "localhost";
-my $database = "sample_staff";
 my $tablename = "";
-my $user = "root";
-my $pw = "zebra";
+my $config_file="MySQL.conf";
+my $csv_file="/home/gary/log/mysql.csv";
+unlink $csv_file;
+
+my $CSV = IO::File->new("$csv_file",">>") or die "\nError: Can't open $csv_file. $! \n\n";
+
+
+my %config;
+
+&initialize($config_file);
+print "$0: initialization complete\n";
+my $host=$config{host};
+my $database=$config{database};
+my $user=$config{user};
+my $pw=$config{pw};
+my $port=$config{port};
 
 #DATA SOURCE NAME
-my $dsn = "dbi:mysql:$database:localhost:3306";
+my $dsn = "dbi:mysql:$database:$host:$port";
 
 # PERL DBI CONNECT
 my $dbstore = DBI->connect($dsn, $user, $pw) or die "Unable to connect: $DBI::errstr\n";
+print "$0: connection complete\n";
+
 # PREPARE THE QUERY
 my $query = "SELECT * from employee LIMIT 5";
 my $sth = $dbstore->prepare($query);
 	$sth->execute();
+
+# 5) fetchrow_hashref
+print "fetching into hash ref and printing results: \n";
+while ( my $hash_ref=$sth->fetchrow_hashref() ) {
+	printf("%s,%s,%s,%s,\n", $hash_ref->{id}, $hash_ref->{first_name}, $hash_ref->{last_name}, $hash_ref->{email} );
+	print $CSV "$hash_ref->{id}, $hash_ref->{first_name}, $hash_ref->{last_name}, $hash_ref->{email})\n";	
+}
+  $sth->finish();
+$CSV->close();
+sub initialize() {
+	my $conf=shift;
+	my $CONFIG = IO::File->new("$conf","<") or die "\nError: Can't open $conf. $! \n\n";
+
+	my $line;
+	while(defined($line = $CONFIG->getline())){
+        	next if $line =~ /^#/;   # skipping comments
+        	if ($line =~ /(.*?)\=(.*)/) {
+                	my $key=$1;
+                	my $value=$2;
+                	$value=~s#\"(.*)\"#$1#g;   # removing quotes if any
+                	$value=~ s#^\s+|\s+$##g;   # removing leading/trailing spaces if any
+                	$key=~s#^\s+|\s+$##g;
+                	$config{$key} = $value;
+        	}
+	}
+	$CONFIG->close();
+}
+
+##########################
+## Other database options
+##########################
 
 #  1)
 # BIND TABLE COLUMNS TO VARIABLES
@@ -42,13 +89,3 @@ my $sth = $dbstore->prepare($query);
 #while(my $array_ref = $sth->fetchrow_arrayref()){
  #  printf("%s\t%s\t%s\t%s\n", $array_ref->[0],
  #                            $array_ref->[1],
- #                            $array_ref->[2],
- #                            $array_ref->[3]);
- # }
-
-# 5) fetchrow_hashref
-while ( my $hash_ref=$sth->fetchrow_hashref() ) {
-	printf("%s\t%s\t%s\t%s\n", $hash_ref->{id}, $hash_ref->{first_name}, $hash_ref->{last_name}, $hash_ref->{email} );
-}
-  $sth->finish();
-
