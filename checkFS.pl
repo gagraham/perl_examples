@@ -2,8 +2,8 @@
 use strict;
 
 my $limit=90;
-my $server="g03zcimq001.ahe.boulder.ibm.com";
-my $MAIL_TO="gagraham\@us.ibm.com,harristm\@us.ibm.com,varian\@us.ibm.com,jblacks\@us.ibm.com";
+my $server="localhost";
+my $MAIL_TO="gagrahamster\@gmail.com";
 
 my $SUBJECT="FILESPACE Report: $server "; 
 my $ME=$server;
@@ -21,6 +21,7 @@ foreach $line (@array) {
 		}
 	}	
 }
+$content="TESTING CONTENT";
 if($content) {
 	print "CONTENT=$content\n";
 	$content="$info" . "$content";
