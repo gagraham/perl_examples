@@ -11,6 +11,10 @@ my $tablename = "";
 my $config_file="MySQL.conf";
 my $csv_file="/home/gary/log/mysql.csv";
 unlink $csv_file;
+##############
+# Query
+my $query = "SELECT * from employee LIMIT 50";
+##############
 
 my $CSV = IO::File->new("$csv_file",">>") or die "\nError: Can't open $csv_file. $! \n\n";
 
@@ -33,7 +37,6 @@ my $dbstore = DBI->connect($dsn, $user, $pw) or die "Unable to connect: $DBI::er
 print "$0: connection complete\n";
 
 # PREPARE THE QUERY
-my $query = "SELECT * from employee LIMIT 5";
 my $sth = $dbstore->prepare($query);
 	$sth->execute();
 
