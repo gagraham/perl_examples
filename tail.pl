@@ -42,6 +42,7 @@ while (<FILE>) {
 	print $_;
 }
 
+### this is for reference only: foo
 =begin test_one
 =end test_one
 =cut
