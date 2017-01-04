@@ -44,6 +44,5 @@ while (<FILE>) {
 
 ### this is for reference only: foo
 =begin test_one
-Testing revert again
 =end test_one
 =cut
